@@ -9,6 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static('public'));
 app.use('/api/tts', ttsRoute);
 app.use('/api/stt', sttRoute);
 app.use('/api/pricing', pricingRoute);
