@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صوتيات | تحويل النص إلى صوت والصوت إلى نص</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@0.378.0/dist/umd/lucide.min.js"></script>
+
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #1D4ED8, #3B82F6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-primary {
+            @apply bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 duration-300;
+        }
+        .btn-secondary {
+            @apply bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-transform transform hover:scale-105 duration-300;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- ======== Header ======== -->
+    <header id="main-header" class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-2xl font-bold gradient-text">صوتيات</a>
+            <div class="hidden md:flex items-center space-x-8 space-x-reverse">
+                <a href="#home" class="text-gray-600 hover:text-blue-600 transition">الرئيسية</a>
+                <a href="#features" class="text-gray-600 hover:text-blue-600 transition">الميزات</a>
+                <a href="#pricing" class="text-gray-600 hover:text-blue-600 transition">الأسعار</a>
+                <a href="https://github.com/your-repo/api-docs" target="_blank" class="text-gray-600 hover:text-blue-600 transition">توثيق API</a>
+            </div>
+            <div class="hidden md:flex items-center space-x-4 space-x-reverse">
+                <a href="#login" class="text-gray-600 font-semibold hover:text-blue-600">تسجيل الدخول</a>
+                <a href="#register" class="btn-primary">أنشئ حساب مجاني</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#home" class="block py-2 text-gray-600 hover:text-blue-600">الرئيسية</a>
+            <a href="#features" class="block py-2 text-gray-600 hover:text-blue-600">الميزات</a>
+            <a href="#pricing" class="block py-2 text-gray-600 hover:text-blue-600">الأسعار</a>
+            <a href="https://github.com/your-repo/api-docs" target="_blank" class="block py-2 text-gray-600 hover:text-blue-600">توثيق API</a>
+            <div class="border-t my-2"></div>
+            <a href="#login" class="block py-2 text-gray-600 font-semibold hover:text-blue-600">تسجيل الدخول</a>
+            <a href="#register" class="block mt-2 w-full text-center btn-primary">أنشئ حساب مجاني</a>
+        </div>
+    </header>
+    
+    <!-- ======== Dashboard Header (Initially Hidden) ======== -->
+    <header id="dashboard-header" class="hidden bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#dashboard/tts" class="text-2xl font-bold gradient-text">لوحة التحكم</a>
+            <div class="flex items-center space-x-4 space-x-reverse">
+                <span class="text-gray-600">مرحباً, أبو نواف</span>
+                <button id="logout-button" class="flex items-center text-red-500 hover:text-red-700">
+                    <i data-lucide="log-out" class="w-5 h-5 ml-2"></i>
+                    <span>خروج</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+
+    <main>
+        <!-- ======== Home Page ======== -->
+        <div id="home" class="page">
+            <!-- Hero Section -->
+            <section class="py-20 bg-white">
+                <div class="container mx-auto px-6 text-center">
+                    <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">
+                        حوّل نصوصك إلى <span class="gradient-text">أصوات واقعية</span>
+                    </h1>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                        وأفرغ تسجيلاتك الصوتية بضغطة زر. استفد من تقنيات الذكاء الاصطناعي المتقدمة لإنشاء محتوى صوتي احترافي أو تفريغ اجتماعاتك ومحاضراتك بدقة عالية.
+                    </p>
+                    <div class="mt-8">
+                        <a href="#register" class="btn-primary text-lg">ابدأ الآن مجانًا</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Try Tool -->
+            <section class="py-16">
+                <div class="container mx-auto px-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Text to Speech -->
+                            <div>
+                                <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="text" class="w-6 h-6 ml-2 text-blue-600"></i>نص إلى صوت (تجربة)</h3>
+                                <textarea id="tts-demo-text" class="w-full h-32 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 transition" placeholder="اكتب نصًا هنا (بحد أقصى 250 حرف للتجربة)..." maxlength="250"></textarea>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <select id="tts-demo-voice" class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                                        <option value="male">صوت رجالي</option>
+                                        <option value="female">صوت نسائي</option>
+                                    </select>
+                                    <button id="tts-demo-button" class="btn-primary py-2 px-4">
+                                        <span class="button-text">استمع الآن</span>
+                                        <span class="button-loader hidden animate-spin">...</span>
+                                    </button>
+                                </div>
+                                <div id="tts-demo-result" class="mt-4"></div>
+                            </div>
+                            <!-- Speech to Text -->
+                            <div>
+                                <h3 class="text-xl font-bold mb-4 flex items-center"><i data-lucide="audio-lines" class="w-6 h-6 ml-2 text-blue-600"></i>صوت إلى نص (تجربة)</h3>
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition bg-gray-50">
+                                    <input type="file" id="stt-demo-file" class="hidden">
+                                    <label for="stt-demo-file" class="cursor-pointer">
+                                        <i data-lucide="upload-cloud" class="w-12 h-12 mx-auto text-gray-400"></i>
+                                        <p class="mt-2 text-gray-600">ارفع ملف صوتي (MP3, WAV)</p>
+                                        <p class="text-sm text-gray-500">بحد أقصى 1 ميجابايت</p>
+                                    </label>
+                                </div>
+                                <p id="stt-demo-filename" class="text-center mt-2 text-sm text-gray-500"></p>
+                                <div id="stt-demo-result" class="mt-4 p-3 bg-gray-100 rounded-lg h-24 overflow-y-auto hidden">
+                                    <p class="text-gray-700"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Features Section -->
+            <section id="features" class="py-20 bg-white">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold">لماذا تختار صوتيات؟</h2>
+                        <p class="mt-4 text-gray-600 max-w-2xl mx-auto">نقدم لك مجموعة من الميزات القوية المصممة لتلبية جميع احتياجاتك الصوتية.</p>
+                    </div>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Feature 1 -->
+                        <div class="bg-gray-50 p-6 rounded-lg text-center">
+                            <div class="bg-blue-100 text-blue-600 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                <i data-lucide="bot" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">أصوات طبيعية وواقعية</h3>
+                            <p class="text-gray-600">استخدم أحدث تقنيات الذكاء الاصطناعي لتوليد أصوات بشرية لا يمكن تمييزها عن الحقيقة.</p>
+                        </div>
+                        <!-- Feature 2 -->
+                        <div class="bg-gray-50 p-6 rounded-lg text-center">
+                            <div class="bg-blue-100 text-blue-600 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                <i data-lucide="languages" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">دعم لغات متعددة</h3>
+                            <p class="text-gray-600">دعم كامل للغة العربية ولهجاتها، بالإضافة إلى عشرات اللغات العالمية الأخرى.</p>
+                        </div>
+                        <!-- Feature 3 -->
+                        <div class="bg-gray-50 p-6 rounded-lg text-center">
+                            <div class="bg-blue-100 text-blue-600 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                <i data-lucide="code-2" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">API سهل للمطورين</h3>
+                            <p class="text-gray-600">قم بدمج خدماتنا بسهولة في تطبيقاتك ومواقعك عبر واجهة برمجية (API) قوية وموثقة.</p>
+                        </div>
+                        <!-- Feature 4 -->
+                        <div class="bg-gray-50 p-6 rounded-lg text-center">
+                           <div class="bg-blue-100 text-blue-600 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                <i data-lucide="voicemail" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">نسخ الصوت (Voice Cloning)</h3>
+                            <p class="text-gray-600">ميزة حصرية لإنشاء نسخة رقمية من صوتك أو أي صوت آخر لاستخدامه في مشاريعك.</p>
+                        </div>
+                        <!-- Feature 5 -->
+                        <div class="bg-gray-50 p-6 rounded-lg text-center">
+                            <div class="bg-blue-100 text-blue-600 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                <i data-lucide="shield-check" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">أمان وخصوصية</h3>
+                            <p class="text-gray-600">نحن نضمن سرية بياناتك وملفاتك. جميع العمليات مشفرة ومحمية بالكامل.</p>
+                        </div>
+                        <!-- Feature 6 -->
+                        <div class="bg-gray-50 p-6 rounded-lg text-center">
+                            <div class="bg-blue-100 text-blue-600 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                                <i data-lucide="gauge-circle" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">لوحة تحكم متكاملة</h3>
+                            <p class="text-gray-600">إدارة ملفاتك، ومتابعة استهلاكك، والوصول إلى مفتاح API الخاص بك من مكان واحد.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ======== Pricing Page ======== -->
+        <div id="pricing" class="page">
+            <section class="py-20">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold">باقات مرنة تناسب الجميع</h2>
+                        <p class="mt-4 text-gray-600 max-w-2xl mx-auto">اختر الباقة التي تناسب حجم أعمالك، سواء كنت فردًا أو شركة.</p>
+                    </div>
+                    <div class="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                        <!-- Free Plan -->
+                        <div class="border rounded-lg p-8 bg-white flex flex-col">
+                            <h3 class="text-2xl font-bold">الباقة المجانية</h3>
+                            <p class="text-gray-500 mt-2">للأفراد والتجارب</p>
+                            <p class="text-4xl font-bold my-6">0<span class="text-lg font-normal text-gray-500"> ريال/شهريًا</span></p>
+                            <ul class="space-y-4 text-gray-700 flex-grow">
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>10,000 حرف/شهريًا</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>15 دقيقة تفريغ/شهريًا</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>5 أصوات أساسية</li>
+                                <li class="flex items-center"><i data-lucide="x" class="w-5 h-5 text-red-500 ml-2"></i>دعم API</li>
+                                <li class="flex items-center"><i data-lucide="x" class="w-5 h-5 text-red-500 ml-2"></i>نسخ الصوت</li>
+                            </ul>
+                            <a href="#register" class="mt-8 w-full text-center btn-secondary">ابدأ مجانًا</a>
+                        </div>
+                        <!-- Basic Plan -->
+                        <div class="border-2 border-blue-600 rounded-lg p-8 bg-white flex flex-col relative shadow-2xl">
+                            <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full absolute -top-4 right-8">الأكثر شيوعًا</span>
+                            <h3 class="text-2xl font-bold">الباقة الأساسية</h3>
+                            <p class="text-gray-500 mt-2">للمحترفين وصناع المحتوى</p>
+                            <p class="text-4xl font-bold my-6">99<span class="text-lg font-normal text-gray-500"> ريال/شهريًا</span></p>
+                            <ul class="space-y-4 text-gray-700 flex-grow">
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>200,000 حرف/شهريًا</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>300 دقيقة تفريغ/شهريًا</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>50+ صوت احترافي</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>دعم API</li>
+                                <li class="flex items-center"><i data-lucide="x" class="w-5 h-5 text-red-500 ml-2"></i>نسخ الصوت</li>
+                            </ul>
+                            <a href="#register" class="mt-8 w-full text-center btn-primary">اشترك الآن</a>
+                        </div>
+                        <!-- Pro Plan -->
+                        <div class="border rounded-lg p-8 bg-white flex flex-col">
+                            <h3 class="text-2xl font-bold">الباقة المتقدمة</h3>
+                            <p class="text-gray-500 mt-2">للشركات والاستخدام المكثف</p>
+                            <p class="text-4xl font-bold my-6">299<span class="text-lg font-normal text-gray-500"> ريال/شهريًا</span></p>
+                            <ul class="space-y-4 text-gray-700 flex-grow">
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>1,000,000 حرف/شهريًا</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>1,000 دقيقة تفريغ/شهريًا</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>100+ صوت فائق الواقعية</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>دعم API</li>
+                                <li class="flex items-center"><i data-lucide="check" class="w-5 h-5 text-green-500 ml-2"></i>نسخ الصوت (صوت واحد)</li>
+                            </ul>
+                            <a href="#register" class="mt-8 w-full text-center btn-secondary">اشترك الآن</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ======== Login Page ======== -->
+        <div id="login" class="page">
+            <div class="flex items-center justify-center min-h-screen bg-gray-50">
+                <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold text-center">تسجيل الدخول</h2>
+                    <form id="login-form" class="space-y-6">
+                        <div>
+                            <label for="login-email" class="text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+                            <input id="login-email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" value="abu.nawaf@example.com">
+                        </div>
+                        <div>
+                            <label for="login-password" class="text-sm font-medium text-gray-700">كلمة المرور</label>
+                            <input id="login-password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" value="password123">
+                        </div>
+                        <button type="submit" class="w-full btn-primary">دخول</button>
+                        <p class="text-sm text-center text-gray-600">
+                            ليس لديك حساب؟ <a href="#register" class="font-medium text-blue-600 hover:underline">أنشئ حسابًا جديدًا</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======== Register Page ======== -->
+        <div id="register" class="page">
+             <div class="flex items-center justify-center min-h-screen bg-gray-50">
+                <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold text-center">إنشاء حساب جديد</h2>
+                    <form id="register-form" class="space-y-6">
+                        <div>
+                            <label for="register-name" class="text-sm font-medium text-gray-700">الاسم</label>
+                            <input id="register-name" type="text" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="register-email" class="text-sm font-medium text-gray-700">البريد الإلكتروني</label>
+                            <input id="register-email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="register-password" class="text-sm font-medium text-gray-700">كلمة المرور</label>
+                            <input id="register-password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button type="submit" class="w-full btn-primary">إنشاء حساب</button>
+                         <p class="text-sm text-center text-gray-600">
+                            لديك حساب بالفعل؟ <a href="#login" class="font-medium text-blue-600 hover:underline">سجل الدخول</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ======== Dashboard Page ======== -->
+        <div id="dashboard" class="page">
+            <div class="flex h-screen bg-gray-100">
+                <!-- Sidebar -->
+                <aside class="w-64 bg-white shadow-md hidden md:block">
+                    <div class="p-6">
+                        <h2 class="text-lg font-bold text-gray-700">القائمة</h2>
+                    </div>
+                    <nav class="mt-2">
+                        <a href="#dashboard/tts" class="dashboard-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                            <i data-lucide="text" class="w-5 h-5 ml-3"></i> تحويل نص إلى صوت
+                        </a>
+                        <a href="#dashboard/stt" class="dashboard-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                            <i data-lucide="audio-lines" class="w-5 h-5 ml-3"></i> تحويل صوت إلى نص
+                        </a>
+                        <a href="#dashboard/clone" class="dashboard-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                            <i data-lucide="voicemail" class="w-5 h-5 ml-3"></i> نسخ الصوت
+                        </a>
+                        <a href="#dashboard/files" class="dashboard-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                            <i data-lucide="folder" class="w-5 h-5 ml-3"></i> ملفاتي
+                        </a>
+                        <a href="#dashboard/subscription" class="dashboard-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                            <i data-lucide="gem" class="w-5 h-5 ml-3"></i> اشتراكي
+                        </a>
+                        <a href="#dashboard/api" class="dashboard-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                            <i data-lucide="code-2" class="w-5 h-5 ml-3"></i> توثيق API
+                        </a>
+                        <a href="#dashboard/settings" class="dashboard-link flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 hover:text-blue-600">
+                            <i data-lucide="settings" class="w-5 h-5 ml-3"></i> الإعدادات
+                        </a>
+                    </nav>
+                </aside>
+                
+                <!-- Main Content -->
+                <div class="flex-1 flex flex-col overflow-hidden">
+                    <div class="flex-1 p-6 md:p-10 overflow-y-auto">
+                        
+                        <!-- Dashboard Panels -->
+                        <div id="dashboard-tts" class="dashboard-panel">
+                           <h1 class="text-3xl font-bold mb-6">تحويل نص إلى صوت</h1>
+                           <!-- TTS main tool -->
+                        </div>
+                        <div id="dashboard-stt" class="dashboard-panel">
+                           <h1 class="text-3xl font-bold mb-6">تحويل صوت إلى نص</h1>
+                           <!-- STT main tool -->
+                        </div>
+                        <div id="dashboard-clone" class="dashboard-panel">
+                           <h1 class="text-3xl font-bold mb-6">نسخ الصوت</h1>
+                           <div class="bg-yellow-100 border-r-4 border-yellow-500 text-yellow-700 p-4 rounded-lg" role="alert">
+                              <p class="font-bold">ميزة حصرية!</p>
+                              <p>هذه الميزة متاحة فقط لمشتركي الباقة المتقدمة. <a href="#pricing" class="font-bold underline">قم بترقية باقتك الآن</a>.</p>
+                            </div>
+                        </div>
+                        <div id="dashboard-files" class="dashboard-panel">
+                           <h1 class="text-3xl font-bold mb-6">ملفاتي</h1>
+                           <p class="text-gray-500">لا توجد ملفات بعد.</p>
+                        </div>
+                        <div id="dashboard-subscription" class="dashboard-panel">
+                           <h1 class="text-3xl font-bold mb-6">اشتراكي</h1>
+                           <div class="bg-white p-6 rounded-lg shadow">
+                                <h2 class="text-xl font-bold mb-4">الباقة الأساسية</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="flex justify-between"><span>استخدام الحروف (TTS)</span> <span>15,000 / 200,000</span></p>
+                                        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 7.5%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="flex justify-between"><span>استخدام الدقائق (STT)</span> <span>25 / 300</span></p>
+                                        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                                            <div class="bg-green-500 h-2.5 rounded-full" style="width: 8.3%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="mt-6 text-sm text-gray-500">سيتم تجديد باقتك في 24 سبتمبر 2025.</p>
+                                <button class="mt-4 btn-secondary">إدارة الاشتراك</button>
+                           </div>
+                        </div>
+                        <div id="dashboard-api" class="dashboard-panel">
+                           <h1 class="text-3xl font-bold mb-6">مفتاح و توثيق API</h1>
+                           <div class="bg-white p-6 rounded-lg shadow">
+                               <h2 class="text-xl font-bold mb-2">مفتاح API الخاص بك</h2>
+                               <p class="text-gray-600 mb-4">استخدم هذا المفتاح لربط تطبيقاتك مع خدمات صوتيات. حافظ على سريته.</p>
+                               <div class="flex items-center space-x-2 space-x-reverse bg-gray-100 p-3 rounded-lg">
+                                   <input id="api-key-input" type="text" class="flex-grow bg-transparent font-mono text-sm" value="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" readonly>
+                                   <button id="copy-api-key" title="نسخ المفتاح">
+                                       <i data-lucide="copy" class="w-5 h-5 text-gray-500 hover:text-blue-600"></i>
+                                   </button>
+                               </div>
+                               <p id="copy-feedback" class="text-green-600 text-sm mt-2 h-4"></p>
+                           </div>
+                           <div class="bg-white p-6 rounded-lg shadow mt-6">
+                               <h2 class="text-xl font-bold mb-4">مثال على الاستخدام (cURL)</h2>
+                               <pre class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto"><code class="language-bash">
+curl --request POST \
+  --url https://api.sawtiyat.com/v1/tts \
+  --header 'Authorization: Bearer sk-xxxxxxxx' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "text": "مرحباً بالعالم!",
+    "voice": "male-ar-1"
+  }'
+                               </code></pre>
+                           </div>
+                        </div>
+                        <div id="dashboard-settings" class="dashboard-panel">
+                           <h1 class="text-3xl font-bold mb-6">الإعدادات</h1>
+                           <!-- Settings form -->
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ======== Footer ======== -->
+    <footer class="bg-white border-t">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-right">
+                <p class="text-gray-600">&copy; 2025 صوتيات. جميع الحقوق محفوظة.</p>
+                <div class="flex mt-4 md:mt-0 space-x-6 space-x-reverse">
+                    <a href="#" class="text-gray-500 hover:text-blue-600">شروط الاستخدام</a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600">سياسة الخصوصية</a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600">تواصل معنا</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pages = document.querySelectorAll('.page');
+            const dashboardPanels = document.querySelectorAll('.dashboard-panel');
+            const mainHeader = document.getElementById('main-header');
+            const dashboardHeader = document.getElementById('dashboard-header');
+            const dashboardLinks = document.querySelectorAll('.dashboard-link');
+
+            // --- Router Logic ---
+            function showPage(hash) {
+                let pageId = hash ? hash.split('/')[0].substring(1) : 'home';
+                if (!document.getElementById(pageId)) {
+                    pageId = 'home';
+                }
+
+                // Toggle headers
+                if (pageId === 'dashboard') {
+                    mainHeader.classList.add('hidden');
+                    dashboardHeader.classList.remove('hidden');
+                } else {
+                    mainHeader.classList.remove('hidden');
+                    dashboardHeader.classList.add('hidden');
+                }
+
+                // Show active page
+                pages.forEach(page => {
+                    page.classList.toggle('active', page.id === pageId);
+                });
+                
+                // Handle dashboard panels
+                if (pageId === 'dashboard') {
+                    const panelId = hash.split('/')[1] || 'tts';
+                    showDashboardPanel(panelId);
+                }
+                
+                window.scrollTo(0, 0);
+            }
+
+            function showDashboardPanel(panelId) {
+                dashboardPanels.forEach(panel => {
+                    panel.style.display = panel.id === `dashboard-${panelId}` ? 'block' : 'none';
+                });
+                 dashboardLinks.forEach(link => {
+                    link.classList.toggle('bg-blue-50', link.getAttribute('href').endsWith(`/${panelId}`));
+                    link.classList.toggle('text-blue-600', link.getAttribute('href').endsWith(`/${panelId}`));
+                });
+            }
+
+            window.addEventListener('hashchange', () => showPage(window.location.hash));
+            // Initial page load
+            showPage(window.location.hash || '#home');
+
+            // --- Navigation Handling ---
+            document.body.addEventListener('click', (e) => {
+                const anchor = e.target.closest('a');
+                if (anchor && anchor.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    window.location.hash = anchor.getAttribute('href');
+                }
+            });
+            
+            // --- Mobile Menu ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // --- Demo Tools Logic ---
+            // TTS Demo
+            const ttsDemoButton = document.getElementById('tts-demo-button');
+            const ttsDemoText = document.getElementById('tts-demo-text');
+            const ttsDemoResult = document.getElementById('tts-demo-result');
+            ttsDemoButton.addEventListener('click', () => {
+                if (!ttsDemoText.value.trim()) return;
+                
+                const buttonText = ttsDemoButton.querySelector('.button-text');
+                const buttonLoader = ttsDemoButton.querySelector('.button-loader');
+                
+                buttonText.classList.add('hidden');
+                buttonLoader.classList.remove('hidden');
+                ttsDemoButton.disabled = true;
+
+                setTimeout(() => {
+                    ttsDemoResult.innerHTML = `
+                        <audio controls autoplay class="w-full">
+                            <source src="https://placehold.co/audio/8B5CF6/FFFFFF/mp3" type="audio/mpeg">
+                            متصفحك لا يدعم عنصر الصوت.
+                        </audio>
+                    `;
+                    buttonText.classList.remove('hidden');
+                    buttonLoader.classList.add('hidden');
+                    ttsDemoButton.disabled = false;
+                }, 1500);
+            });
+
+            // STT Demo
+            const sttDemoFile = document.getElementById('stt-demo-file');
+            const sttDemoFilename = document.getElementById('stt-demo-filename');
+            const sttDemoResult = document.getElementById('stt-demo-result');
+            sttDemoFile.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    sttDemoFilename.textContent = file.name;
+                    sttDemoResult.classList.remove('hidden');
+                    sttDemoResult.querySelector('p').textContent = 'جاري التحويل...';
+
+                    setTimeout(() => {
+                        sttDemoResult.querySelector('p').textContent = 'السلام عليكم ورحمة الله وبركاته. هذا هو النص الذي تم تفريغه من الملف الصوتي التجريبي. يتميز النظام بالدقة العالية في التعرف على الكلام.';
+                    }, 2000);
+                }
+            });
+
+            // --- Auth Flow Simulation ---
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const logoutButton = document.getElementById('logout-button');
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                window.location.hash = '#dashboard/tts';
+            });
+             registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                window.location.hash = '#dashboard/tts';
+            });
+            logoutButton.addEventListener('click', () => {
+                window.location.hash = '#home';
+            });
+
+            // --- API Key Copy ---
+            const copyApiKeyBtn = document.getElementById('copy-api-key');
+            const apiKeyInput = document.getElementById('api-key-input');
+            const copyFeedback = document.getElementById('copy-feedback');
+
+            copyApiKeyBtn.addEventListener('click', () => {
+                // Use execCommand for broader compatibility in iFrames
+                apiKeyInput.select();
+                apiKeyInput.setSelectionRange(0, 99999); // For mobile devices
+                try {
+                    document.execCommand('copy');
+                    copyFeedback.textContent = 'تم النسخ!';
+                    setTimeout(() => { copyFeedback.textContent = ''; }, 2000);
+                } catch (err) {
+                    copyFeedback.textContent = 'فشل النسخ';
+                }
+                window.getSelection().removeAllRanges();
+            });
+
+            // --- Initialize Lucide Icons ---
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
